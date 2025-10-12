@@ -1,0 +1,14 @@
+{
+  "name": "天聚数行-快递查询",
+  "render_readme": true,
+  "domains": ["sensor"],
+  "homeassistant": "2023.8.0",
+  "iot_class": "Cloud Polling",
+  "country": ["CN"],
+  "content_in_root": false,
+  "zip_release": false,
+  "filename": "tian_express.zip",
+  "hide_default_branch": true,
+  "persistent_directory": "none",
+  "hacs": "1.0.0"
+}
