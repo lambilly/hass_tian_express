@@ -19,7 +19,7 @@
 
 1. 确保已安装 [HACS](https://hacs.xyz/)
 2. 在 HACS 的 "Integrations" 页面，点击右上角的三个点菜单，选择 "Custom repositories"
-3. 在弹出窗口中添加仓库地址：`https://github.com/lambilly/hass_tjsx_kuaidi_chaxun/`，类别选择 "Integration"
+3. 在弹出窗口中添加仓库地址：`https://github.com/lambilly/hass_tian_express/`，类别选择 "Integration"
 4. 在 HACS 中搜索 "天聚数行-快递查询"
 5. 点击下载
 6. 重启 Home Assistant
@@ -27,7 +27,7 @@
 ### 方法二：手动安装
 
 1. 下载此仓库的 ZIP 文件
-2. 解压后将 `custom_components/tjsx_kuaidi_chaxun` 文件夹复制到您的 Home Assistant 的 `custom_components` 目录
+2. 解压后将 `custom_components/tian_express` 文件夹复制到您的 Home Assistant 的 `custom_components` 目录
 3. 重启 Home Assistant
 
 ## 配置
