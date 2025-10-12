@@ -1,4 +1,4 @@
-"""Constants for the TJSX Kuaidi Chaxun integration."""
+"""Constants for the Tian Express integration."""
 
 DOMAIN = "tian_express"
 CONF_API_KEY = "api_key"
