@@ -64,6 +64,7 @@ class TianExpressDataUpdateCoordinator(DataUpdateCoordinator):
         self.scan_interval = scan_interval
         self._last_update_time = None
         self._is_delivered = False  # 标记快递是否已签收
+        self._last_successful_data = None  # 存储最后一次成功获取的数据
 
         update_interval = timedelta(hours=scan_interval)
 
@@ -79,7 +80,7 @@ class TianExpressDataUpdateCoordinator(DataUpdateCoordinator):
         # 如果快递已签收，不再更新数据
         if self._is_delivered:
             _LOGGER.info(f"快递 {self.express_number} 已签收，停止定期更新")
-            return None
+            return self._last_successful_data
             
         try:
             async with async_timeout.timeout(10):
@@ -93,10 +94,19 @@ class TianExpressDataUpdateCoordinator(DataUpdateCoordinator):
                     if status == 4:  # 4表示已签收
                         self._is_delivered = True
                         _LOGGER.info(f"快递 {self.express_number} 已签收，将停止定期更新")
-                
-                return data
+                    
+                    # 更新最后一次成功数据
+                    self._last_successful_data = data
+                    return data
+                else:
+                    # API返回错误，但保持原有数据
+                    _LOGGER.warning(f"API返回错误，保持原有数据。错误码: {data.get('code')}, 错误信息: {data.get('msg')}")
+                    return self._last_successful_data
+                    
         except Exception as err:
-            raise UpdateFailed(f"Error communicating with API: {err}")
+            # 发生异常时，记录错误但保持原有数据
+            _LOGGER.warning(f"查询快递数据时发生错误，保持原有数据: {err}")
+            return self._last_successful_data
 
     async def _fetch_express_data(self):
         """Fetch express data from the API."""
@@ -108,11 +118,6 @@ class TianExpressDataUpdateCoordinator(DataUpdateCoordinator):
                     raise UpdateFailed(f"HTTP error: {response.status}")
                 
                 data = await response.json()
-                
-                if data.get("code") != 200:
-                    error_msg = data.get("msg", "Unknown error")
-                    raise UpdateFailed(f"API error: {error_msg}")
-                
                 return data
 
     @property
@@ -207,7 +212,7 @@ class TianExpressSensor(CoordinatorEntity, SensorEntity):
             "轨迹数量": len(result.get("list", [])),
             "最新动态": latest_dynamic,
             "已签收": self.coordinator.is_delivered,
-            "更新周期": f"{scan_interval} 小时",  # 新增属性
+            "更新周期": f"{scan_interval} 小时",
         }
         
         # 保留原有的最新轨迹信息（已清理过的）
@@ -238,5 +243,5 @@ class TianExpressSensor(CoordinatorEntity, SensorEntity):
     @property
     def available(self):
         """Return if entity is available."""
-        # 即使快递已签收，实体仍然可用，只是不再更新数据
+        # 即使快递已签收或更新失败，实体仍然可用，只是不再更新数据或使用缓存数据
         return True
